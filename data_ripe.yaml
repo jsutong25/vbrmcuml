@@ -1,0 +1,13 @@
+train: dataset/ripeness/train/images
+val: dataset/ripeness/valid/images
+test: dataset/ripeness/test/images
+
+nc: 4
+names: ['over-ripe', 'partially-ripe', 'ripe', 'unripe']
+
+roboflow:
+  workspace: peerada
+  project: -3vli4
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/peerada/-3vli4/dataset/2

@@ -1,0 +1,13 @@
+train: dataset/disease/train/images
+val: dataset/disease/valid/images
+test: dataset/disease/test/images
+
+nc: 9
+names: ['Alternaria', 'Anthracnose', 'Aspergillus', 'Lasiodiplodia', 'alternaria', 'anthracnose', 'aspergillus', 'healthy', 'lasiodiplodia']
+
+roboflow:
+  workspace: nikhil-s7rhq
+  project: fruit-disease-classification
+  version: 11
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/nikhil-s7rhq/fruit-disease-classification/dataset/11

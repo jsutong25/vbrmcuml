@@ -1,0 +1,21 @@
+{
+  "name": "mango_web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tailwindcss -i ./static/css/styles.css -o ./static/css/tailwind.css --watch",
+    "watch-css": "tailwindcss build -i ./static/css/styles.css -o ./static/css/tailwind.css --watch",
+    "start": "concurrently \"npm run watch-css\" \"flask run\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
+  }
+}

@@ -1,0 +1,12 @@
+test: dataset/mangoes/test/images
+train: dataset/mangoes/train/images
+val: dataset/mangoes/valid/images
+
+nc: 2
+names: ['Mango', 'Not-Mango']
+
+# nc: 1
+# names: ['mango']
+
+# nc: 14
+# names: ['annona', 'apple', 'banana', 'bottle', 'bowl', 'broccoli', 'carrot', 'cup', 'dining table', 'knife', 'mango', 'orange', 'person', 'spoon']
