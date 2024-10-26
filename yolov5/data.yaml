@@ -1,0 +1,12 @@
+train: dataset/images/train
+val: dataset/images/train
+
+nc: 1
+names: ['Mango']
+
+roboflow:
+  workspace: mateo-ojeda
+  project: mango-nguhe
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/mateo-ojeda/mango-nguhe/dataset/1
