@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mango Detection</title>
+    <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1 class="text-blue-300 font-bold">Upload Image</h1>
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if uploaded_image %}
+        <h2>Uploaded Image:</h2>
+        <img src="{{ uploaded_image }}" alt="Uploaded Image" width="300">
+        
+        <h2>Detection Result:</h2>
+        <img src="{{ result_image }}" alt="Detection Result" width="300">
+        
+        <h2>{{ mango_message }}</h2>
+
+        <br>
+        <h2>Ripeness Level: {{ ripeness_label }}</h2>
+        <img src="{{ ripeness_result_image }}" alt="Ripeness Result">
+
+        <br>
+        <h2>Disease Detection result: {{ disease_label }}</h2>
+    {% endif %}
+</body>
+</html>
