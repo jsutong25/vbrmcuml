@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources</title>
+    <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
+
+</head>
+<body>
+    <nav class="w-full bg-black py-8 fixed z-50">
+        <ul class="text-white flex gap-5 mx-10 md:mx-14">
+            <a href="{{ url_for('index') }}" class="transition ease-in-out hover:text-yellow-500" href="#"><li class="font-bold">MangoAI</li></a>
+            <a href="{{ url_for('index') }}" class="transition ease-in-out hover:text-yellow-500" href=""><li class="">Home</li></a>
+            <a href="{{ url_for('resources') }}" class="transition ease-in-out hover:text-yellow-500" href=""><li class="">Resources</li></a>
+        </ul>
+    </nav>
+
+    <main>
+        <section>
+            <div class="w-full relative top-32">
+                <div class="text-center mb-5">
+                    <h1 class="text-2xl md:text-3xl font-bold">Resources</h1>
+                </div>
+
+                <!-- Ripeness -->
+                <div class="px-10 mb-10">
+                    <div class="mb-4 border-b border-black">
+                        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="text-yellow-500 hover:text-yellow-600 border-yellow-600" data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300" role="tablist">
+                            <li class="me-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 rounded-t-lg" id="ripe-styled-tab" data-tabs-target="#styled-ripe" type="button" role="tab" aria-controls="ripe" aria-selected="false">Ripe</button>
+                            </li>
+                            <li class="me-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="unripe-styled-tab" data-tabs-target="#styled-unripe" type="button" role="tab" aria-controls="unripe" aria-selected="false">Unripe</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="default-styled-tab-content">
+                        <div class="hidden p-4 rounded-lg" id="styled-ripe" role="tabpanel" aria-labelledby="ripe-tab">
+                            <p class="text-lg text-black">
+                                <strong class="font-medium text-yellow-500">Color Features:</strong> 
+                                <br>
+                                <span class="underline">Dominant Yellow and Red Hues:</span> Ripe mangoes typically have a vibrant yellow color with hints of red or pink blush. You can extract RGB values or use color histograms to capture the higher intensity in the yellow and red channels.
+                                <br><br>
+                                <span class="underline">Reduced Green Intensity:</span> Compared to unripe mangoes, ripe ones have a lower intensity in the green channel. Color segmentation or thresholding can help identify this shift from green to yellow/red.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Texture Features:</strong> 
+                                <br>
+                                <span class="underline">Smooth but Slightly Wrinkled Surface:</span> Ripe mangoes may show faint wrinkles or slight unevenness on the skin. This can be captured using texture analysis techniques, such as Local Binary Patterns (LBP) or edge detection, to identify small, shallow lines.
+                                <br><br>
+                                <span class="underline">Softness Indicators:</span> While softness is usually not directly visible, small skin deformations or tiny wrinkles near the stem can indicate ripeness.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Shape Features:</strong> 
+                                <br>
+                                <span class="underline">Fuller, Rounded Shape:</span> Ripe mangoes often have a plumper appearance. Contour analysis or calculating the aspect ratio may capture this shape.
+                                <br><br>
+                                <span class="underline">Slightly Oval or Rounded Contours:</span> Most ripe mangoes have rounded, smooth contours. Shape descriptors like roundness or circularity can help quantify this feature.
+                            </p>
+                        </div>
+                        <div class="hidden p-4 rounded-lg" id="styled-unripe" role="tabpanel" aria-labelledby="unripe-tab">
+                            <p class="text-lg text-black">
+                                <strong class="font-medium text-yellow-500">Color Features:</strong> 
+                                <br>
+                                <span class="underline">Dominant Green Color:</span> Unripe mangoes have a predominant green color, with minimal to no yellow or red. You can extract color histograms or mean RGB values to represent this feature.
+                                <br><br>
+                                <span class="underline">Lower Red and Yellow Intensity:</span> Compared to ripe mangoes, unripe ones have significantly lower values in the red and yellow channels, which can be used as distinguishing features.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Texture Features:</strong> 
+                                <br>
+                                <span class="underline">Smooth Surface:</span> The skin of unripe mangoes is smooth and taut, with no visible wrinkles. Texture analysis techniques like Gabor filters or Local Binary Patterns (LBP) can help capture this smoothness.
+                                <br><br>
+                                <span class="underline">Softness Indicators:</span> While softness is usually not directly visible, small skin deformations or tiny wrinkles near the stem can indicate ripeness.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Shape Features:</strong> 
+                                <br>
+                                <span class="underline">Angular Edges Near Stem:</span> Unripe mangoes may have slightly sharper or more defined edges around the stem area. Contour analysis and shape descriptors (like aspect ratio and roundness) could be used to identify any subtle angularity.
+                                <br><br>
+                                <span class="underline">Slightly Flatter Shape:</span> Some unripe mangoes have a less plump or full shape. Aspect ratio or contour shape analysis may capture this feature, depending on the mango variety.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diseases -->
+                <div class="px-10 mb-48">
+
+                    <div class="mb-4 border-b border-black">
+                        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="text-yellow-500 hover:text-yellow-600 border-yellow-600" data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300" role="tablist">
+                            <li class="me-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 rounded-t-lg" id="anthracnose-styled-tab" data-tabs-target="#styled-anthracnose" type="button" role="tab" aria-controls="profile" aria-selected="false">Anthracnose</button>
+                            </li>
+                            <li class="me-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="aspergillus-styled-tab" data-tabs-target="#styled-aspergillus" type="button" role="tab" aria-controls="aspergillus" aria-selected="false">Black-mould rot</button>
+                            </li>
+                            <li class="me-2" role="presentation">
+                                <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="lasiodiplodia-styled-tab" data-tabs-target="#styled-lasiodiplodia" type="button" role="tab" aria-controls="lasiodiplodia" aria-selected="false">Stem-end rot</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="default-styled-tab-content">
+
+                        <!-- Anthracnose -->
+                        <div class="hidden p-4 rounded-lg" id="styled-anthracnose" role="tabpanel" aria-labelledby="anthracnose-tab">
+                            <p class="text-lg text-black">
+                                <strong class="font-medium text-yellow-500">Scientific name (fungus causing it): </strong> Colletotrichum gloeosporioides
+                                <br><br>
+
+                                <strong class="font-medium text-yellow-500">Casuse/s:</strong> 
+                                <br>
+                                The anthracnose is mainly caused by the fungus Colletotrichum gloeosporioides. It is caused in rainy climates and the fungus thrives in wet conditions.
+                                <br><br>
+                                The disease produces leaf spots; blossom blight, twig blight, and fruit rot symptoms. Tender shoots and foliage are affected which ultimately cause “die back” of young branches.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Treatment:</strong> 
+                                <br>
+                                For treatment, you need to apply fungicide before the expected rainy season. You also need to prune its branches for proper air circulation. Other than that, you need to stop watering the plant from overhead.
+                                <br><br>
+                                Trees can be sprayed twice with Bavistin (0.1%) at 15 days intervals during flowering to control blossom infection. Spraying of copper fungicides about 0.3% is recommended for the control of foliar infection
+                            </p>
+                        </div>
+
+                        <!-- Aspergillus -->
+                        <div class="hidden p-4 rounded-lg" id="styled-aspergillus" role="tabpanel" aria-labelledby="aspergillus-tab">
+                            <p class="text-lg text-black">
+                                <strong class="font-medium text-yellow-500">Scientific name (fungus causing it): </strong> Aspergillus
+                                <br><br>
+
+                                <strong class="font-medium text-yellow-500">Casuse/s:</strong> 
+                                <br>
+                                A post harvest disease and it's caused by Aspergillus niger Van Tiegh. Affected fruits show yellowing with irregular grayish color spots, which develops into a black necrotic area with the  growth of black mold. 
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Treatment:</strong> 
+                                <br>
+                                The black mold rot disease can be managed by avoidance of injury to Mango fruits and its contact to soil, dipping of fruits in hot water with Carbendzim (0.5%) for 5 minutes and covering of fruits with brown or newspaper bags on the tree itself 15 days before harvest.
+                            </p>
+                        </div>
+
+                        <!-- Lasiodiplodia -->
+                        <div class="hidden p-4 rounded-lg" id="styled-lasiodiplodia" role="tabpanel" aria-labelledby="lasiodiplodia-tab">
+                            <p class="text-lg text-black">
+                                <strong class="font-medium text-yellow-500">Scientific name (fungus causing it): </strong> Lasiodiplodia theobromae
+                                <br><br>
+
+                                <strong class="font-medium text-yellow-500">Casuse/s:</strong> 
+                                <br>
+                                During the harvesting of mangoes avoid any damage to the mangoes because then it makes it easy for pathogens to enter the fruit. You also need full post-harvest fungicide treatment to prevent it from happening and spreading.
+                                <br><br>
+                                Water stress during fruit development can predispose fruit to infection, manage irrigation, and root rot control carefully. pre -harvest sprays of fungicides to control bacterial black spot or anthracnose can reduce the incidence of stem-end rot in fruit. Prune trees to improve ventilation and spray.
+                                <br><br>
+                                Avoid harvesting immature fruit and cool fruit immediately after harvest and store in well-ventilated containers.
+
+                                <br><br>
+                                <strong class="font-medium text-yellow-500">Treatment:</strong> 
+                                <br>
+                                For treatment, you need to apply fungicide before the expected rainy season. You also need to prune its branches for proper air circulation. Other than that, you need to stop watering the plant from overhead.
+                                <br><br>
+                                Trees can be sprayed twice with Bavistin (0.1%) at 15 days intervals during flowering to control blossom infection. Spraying of copper fungicides about 0.3% is recommended for the control of foliar infection
+                            </p>
+                        </div>
+                    </div>
+                </div>
+    
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-black">
+        <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+            <div class="md:flex md:justify-between">
+            <div class="mb-6 md:mb-0">
+                <a href="{{ url_for('index') }}" class="flex items-center">
+                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">MangoAI</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+                <div>
+                    <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                        <li class="mb-4">
+                            <a href="{{ url_for('index') }}" class="hover:underline">MangoAI</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('resources') }}" class="hover:underline">Resources</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="{{ url_for('index') }}" class="hover:underline">MangoAI</a>. All Rights Reserved.
+            </span>
+        </div>
+        </div>
+    </footer>
+
+    <script>
+        
+    </script>
+</body>
+</html>
