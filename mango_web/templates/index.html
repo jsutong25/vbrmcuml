@@ -81,7 +81,7 @@
 
         <div id="detection-results" class="hidden flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
             <div class="w-full flex justify-center mt-4 mb-4">
-                <img id="camera-feed" alt="cam" class="rounded-lg hidden">
+                <video id="camera-feed" autoplay playsinline alt="cam" class="rounded-lg hidden"></video>
                 <div class="flex flex-nowrap items-center gap-2 mt-4 ml-4 w-fit">
                     <div class="w-4 h-4 border border-[#FF0000]"></div><p>Mango</p>
                     <div class="w-4 h-4 border border-[#00FF00]"></div><p>Ripeness</p>
@@ -187,28 +187,24 @@
         let intervalId; // Variable to store the interval ID for frame processing
 
         // Start/stop camera function
-        function toggleCamera() {
+        async function toggleCamera() {
             const video = document.getElementById('camera-feed');
             const detectionResultsDiv = document.getElementById('detection-results');
 
             if (video.classList.contains('hidden')) {
-                // Start the camera feed
-                fetch('/start_camera')
-                    .then(() => {
-                        video.src = '/video_feed'; // Set video feed URL
-                        video.classList.remove('hidden'); // Show the video element
-                        detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
-                    })
-                    .catch(err => console.error("Error starting camera:", err));
+                // Start the camera feed (use the user's device camera)
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream; // Set video stream
+                    video.classList.remove('hidden'); // Show the video element
+                    detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
+                    startDetection(video); // Start detecting frames
+                } catch (err) {
+                    console.error("Error accessing camera:", err);
+                }
             } else {
                 // Stop the camera feed
-                fetch('/stop_camera')
-                    .then(() => {
-                        video.src = ''; // Remove the video feed URL
-                        video.classList.add('hidden'); // Hide the video element
-                        detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
-                    })
-                    .catch(err => console.error("Error stopping camera:", err));
+                stopCamera();
             }
         }
 
@@ -225,6 +221,11 @@
                 clearInterval(intervalId);
                 intervalId = null; // Clear the interval ID
             }
+
+            const video = document.getElementById('camera-feed');
+            video.classList.add('hidden'); // Hide the video element
+            const detectionResultsDiv = document.getElementById('detection-results');
+            detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
         }
 
         // Start capturing frames and sending to backend for detection
@@ -252,8 +253,9 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Display detection results
-                        console.log("Detection:", data);
+                        // Display detection results (this should update the UI)
+                        console.log("Detection results:", data);
+                        // You can update the UI with data here (e.g., show detection status)
                     })
                     .catch(error => console.error("Detection error:", error));
                 }
