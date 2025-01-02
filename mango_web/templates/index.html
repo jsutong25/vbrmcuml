@@ -58,7 +58,7 @@
         <div class="flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
              <div>
                  <h2 class="font-bold text-xl text-center">Result:</h2>
-                 <img class="mx-auto" src="{{ uploaded_image }}" alt="Uploaded Image" width="300">
+                 <img class="mx-auto" src="{{ url_for('static', filename=uploaded_image) }}" alt="Uploaded Image" width="300">
             </div>
             
             <div class="flex flex-col my-auto text-center md:text-left">
@@ -81,7 +81,7 @@
 
         <div id="detection-results" class="hidden flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
             <div class="w-full flex justify-center mt-4 mb-4">
-                <video id="camera-feed" autoplay playsinline alt="cam" class="rounded-lg hidden"></video>
+                <video id="camera-feed" autoplay alt="cam" class="rounded-lg hidden"></video>
                 <div class="flex flex-nowrap items-center gap-2 mt-4 ml-4 w-fit">
                     <div class="w-4 h-4 border border-[#FF0000]"></div><p>Mango</p>
                     <div class="w-4 h-4 border border-[#00FF00]"></div><p>Ripeness</p>
@@ -184,48 +184,41 @@
 
     <script>
         let stream; // Variable to hold the camera stream
-        let intervalId; // Variable to store the interval ID for frame processing
+        let video = document.getElementById('camera-feed'); // Video element
+        let detectionResultsDiv = document.getElementById('detection-results'); // Results div
 
         // Start/stop camera function
-        async function toggleCamera() {
-            const video = document.getElementById('camera-feed');
-            const detectionResultsDiv = document.getElementById('detection-results');
-
+        function toggleCamera() {
             if (video.classList.contains('hidden')) {
-                // Start the camera feed (use the user's device camera)
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    video.srcObject = stream; // Set video stream
-                    video.classList.remove('hidden'); // Show the video element
-                    detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
-                    startDetection(video); // Start detecting frames
-                } catch (err) {
-                    console.error("Error accessing camera:", err);
-                }
+                // Start the camera feed
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (mediaStream) {
+                        stream = mediaStream;
+                        video.srcObject = mediaStream; // Attach the media stream to the video element
+                        video.classList.remove('hidden'); // Make the video element visible
+                        detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
+                        video.play(); // Start playing the video
+                    })
+                    .catch(function (err) {
+                        console.error("Error starting camera:", err);
+                        alert("Could not access the camera. Please check your permissions.");
+                    });
             } else {
                 // Stop the camera feed
                 stopCamera();
             }
         }
 
-        // Stop the camera and clear interval
+        // Stop the camera feed
         function stopCamera() {
             if (stream) {
-                // Stop all tracks to turn off the camera
-                stream.getTracks().forEach(track => track.stop());
-                stream = null; // Clear the stream
+                let tracks = stream.getTracks();
+                tracks.forEach(function (track) {
+                    track.stop(); // Stop each track (video and audio)
+                });
+                video.classList.add('hidden'); // Hide the video element
+                detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
             }
-
-            // Clear the interval to stop frame processing
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null; // Clear the interval ID
-            }
-
-            const video = document.getElementById('camera-feed');
-            video.classList.add('hidden'); // Hide the video element
-            const detectionResultsDiv = document.getElementById('detection-results');
-            detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
         }
 
         // Start capturing frames and sending to backend for detection
