@@ -10,63 +10,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+app.config['UPLOAD_FOLDER'] = '/var/www/mango_web/static/uploads/'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+temp = pathlib.WindowsPath
+
 # Load the YOLOv5 models
-mango_model = torch.hub.load('../yolov5', 'custom', path='../yolov5/runs/train/exp24/weights/best.pt', source='local')
-ripeness_model = torch.hub.load('../yolov5', 'custom', path='../yolov5/runs/train/exp35/weights/best.pt', source='local')
-disease_model = torch.hub.load('../yolov5', 'custom', path='../yolov5/runs/train/exp18/weights/best.pt', source='local')  # Load disease model
+try:
+    mango_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp24/weights/best.pt', source='local', force_reload=True, device='cpu')
+    ripeness_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp35/weights/best.pt', source='local', force_reload=True, device='cpu')
+    disease_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp18/weights/best.pt', source='local', force_reload=True, device='cpu')
+finally:
+    pathlib.WindowsPath = temp
 
 mango_message = ""
 ripeness_label = ""
 disease_label = ""
 camera_active = False
-
-heatmap_file_counter = 1
-
-def get_unique_heatmap_filename(base_name, folder, extension=".jpg"):
-    """Generates a unique filename for heatmaps by appending an incremental number."""
-    global heatmap_file_counter
-
-    # Find the next available filename
-    while os.path.exists(os.path.join(folder, f"{base_name}{heatmap_file_counter}{extension}")):
-        heatmap_file_counter += 1
-
-    filename = f"{base_name}{heatmap_file_counter}{extension}"
-    heatmap_file_counter += 1
-    return filename
-
-def generate_heatmap(image, detections, output_path):
-    """
-    Generate a heatmap from YOLO detections and overlay it on the image.
-
-    Args:
-        image: The original image (numpy array).
-        detections: YOLOv5 detections (list of bounding boxes and confidence scores).
-        output_path: File path to save the heatmap.
-    """
-    heatmap = np.zeros(image.shape[:2], dtype=np.float32)
-
-    for detection in detections:
-        x1, y1, x2, y2, conf = map(int, detection[:5])  # Get bounding box and confidence
-        heatmap[y1:y2, x1:x2] += conf  # Add confidence scores to the heatmap region
-
-    # Normalize the heatmap
-    heatmap = (heatmap - heatmap.min()) / (heatmap.max() - heatmap.min() + 1e-6)
-
-    # Resize heatmap to match the image size
-    heatmap_resized = cv2.resize(heatmap, (image.shape[1], image.shape[0]))
-
-    # Convert heatmap to color
-    heatmap_color = cv2.applyColorMap((heatmap_resized * 255).astype(np.uint8), cv2.COLORMAP_JET)
-
-    # Overlay heatmap on the original image
-    overlayed_image = cv2.addWeighted(image, 0.6, heatmap_color, 0.4, 0)
-
-    # Save the heatmap image
-    cv2.imwrite(output_path, overlayed_image)
-
 
 def process_frame(frame):
     global mango_message, ripeness_label, disease_label
@@ -96,13 +56,6 @@ def process_frame(frame):
         heatmap_output_folder = os.path.join(os.getcwd(), 'static', 'heatmaps')
         if not os.path.exists(heatmap_output_folder):
             os.makedirs(heatmap_output_folder)
-
-        # Generate a unique filename for the heatmap
-        heatmap_filename = get_unique_heatmap_filename("mango_heatmap", heatmap_output_folder)
-        output_path = os.path.join(heatmap_output_folder, heatmap_filename)
-
-        print(f"Saving heatmap to {output_path}")
-        generate_heatmap(frame, mango_detections, output_path)  # Generate and save heatmap
 
         # Run ripeness model detection
         ripeness_results = ripeness_model(img_rgb)
@@ -188,19 +141,12 @@ def index():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
+
+            uploaded_image = os.path.join('uploads', filename)
             
             # Run YOLOv5 mango detection inference with the merged dataset model
             mango_results = mango_model(filepath)
             mango_detections = mango_results.pred[0].cpu().numpy()
-
-            # Generate and save the heatmap
-            heatmap_output_folder = os.path.join(os.getcwd(), 'static', 'heatmaps')
-            if not os.path.exists(heatmap_output_folder):
-                os.makedirs(heatmap_output_folder)
-            heatmap_filename = get_unique_heatmap_filename("mango_heatmap", heatmap_output_folder)
-            output_path = os.path.join(heatmap_output_folder, heatmap_filename)
-            image = cv2.imread(filepath)
-            generate_heatmap(image, mango_detections, output_path)
             
             # Get the names of the detected classes (including mango and non-mango objects)
             detected_classes = mango_results.names  # class labels
@@ -222,7 +168,11 @@ def index():
             time.sleep(0.0001)
 
             # Get the correct "exp" folder name by filtering out non-standard folder names
-            detect_path = 'runs/detect'
+            detect_path = '/var/www/mango_web/magno_web/runs/detect'
+            print("Saved to:", detect_path)
+            if not os.path.exists(detect_path):
+                os.makedirs(detect_path)
+
             exp_folders = [folder for folder in os.listdir(detect_path) if folder.startswith('exp') and folder[3:].isdigit()]
 
             if exp_folders:
@@ -282,7 +232,7 @@ def index():
                     disease_label = "No disease detected."
 
                 return render_template('index.html', 
-                                        uploaded_image=filepath, 
+                                        uploaded_image=uploaded_image, 
                                         mango_result_image=destination_path, 
                                         ripeness_label=ripeness_label,
                                         disease_label=disease_label, 
@@ -291,7 +241,7 @@ def index():
                                         mango_message=mango_message)
             else:
                 return render_template('index.html', 
-                                       uploaded_image=filepath, 
+                                       uploaded_image=uploaded_image, 
                                        mango_result_image=destination_path, 
                                        mango_message=mango_message)
 

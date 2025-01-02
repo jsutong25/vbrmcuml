@@ -58,7 +58,7 @@
         <div class="flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
              <div>
                  <h2 class="font-bold text-xl text-center">Result:</h2>
-                 <img class="mx-auto" src="{{ url_for('static', filename=uploaded_image) }}" alt="Uploaded Image" width="300">
+                 <img class="mx-auto" src="{{ uploaded_image }}" alt="Uploaded Image" width="300">
             </div>
             
             <div class="flex flex-col my-auto text-center md:text-left">
@@ -81,7 +81,7 @@
 
         <div id="detection-results" class="hidden flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
             <div class="w-full flex justify-center mt-4 mb-4">
-                <video id="camera-feed" autoplay alt="cam" class="rounded-lg hidden"></video>
+                <video id="camera-feed" autoplay muted class="rounded-lg hidden"></video>
                 <div class="flex flex-nowrap items-center gap-2 mt-4 ml-4 w-fit">
                     <div class="w-4 h-4 border border-[#FF0000]"></div><p>Mango</p>
                     <div class="w-4 h-4 border border-[#00FF00]"></div><p>Ripeness</p>
@@ -183,77 +183,41 @@
     </script>
 
     <script>
-        let stream; // Variable to hold the camera stream
-        let video = document.getElementById('camera-feed'); // Video element
-        let detectionResultsDiv = document.getElementById('detection-results'); // Results div
+        let video = document.getElementById('camera-feed');
 
-        // Start/stop camera function
-        function toggleCamera() {
-            if (video.classList.contains('hidden')) {
-                // Start the camera feed
+        // Start the camera feed using getUserMedia
+        function startCamera() {
+            if (navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function (mediaStream) {
-                        stream = mediaStream;
-                        video.srcObject = mediaStream; // Attach the media stream to the video element
-                        video.classList.remove('hidden'); // Make the video element visible
-                        detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
-                        video.play(); // Start playing the video
+                    .then(function (stream) {
+                        video.srcObject = stream;
+                        video.classList.remove('hidden');  // Show the video element
                     })
-                    .catch(function (err) {
-                        console.error("Error starting camera:", err);
-                        alert("Could not access the camera. Please check your permissions.");
+                    .catch(function (error) {
+                        console.error("Error accessing camera:", error);
                     });
             } else {
-                // Stop the camera feed
-                stopCamera();
+                alert("Your browser does not support getUserMedia.");
             }
         }
 
         // Stop the camera feed
         function stopCamera() {
-            if (stream) {
-                let tracks = stream.getTracks();
+            if (video.srcObject) {
+                const stream = video.srcObject;
+                const tracks = stream.getTracks();
+
                 tracks.forEach(function (track) {
-                    track.stop(); // Stop each track (video and audio)
+                    track.stop();
                 });
-                video.classList.add('hidden'); // Hide the video element
-                detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
+
+                video.srcObject = null;  // Stop the video
+                video.classList.add('hidden');  // Hide the video element
             }
         }
 
-        // Start capturing frames and sending to backend for detection
-        function startDetection(video) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-
-            // Set up an interval for capturing and processing frames
-            intervalId = setInterval(() => {
-                if (stream) { // Only process if the stream is active
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    // Convert frame to base64
-                    const imageData = canvas.toDataURL('image/jpeg');
-
-                    // Send frame to server for detection
-                    fetch('/detect', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ image: imageData })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Display detection results (this should update the UI)
-                        console.log("Detection results:", data);
-                        // You can update the UI with data here (e.g., show detection status)
-                    })
-                    .catch(error => console.error("Detection error:", error));
-                }
-            }, 500); // Capture frame every 500ms
-        }
+        // Call this function when the user clicks a button to start the camera
+        startCamera();
     </script>
 
 
