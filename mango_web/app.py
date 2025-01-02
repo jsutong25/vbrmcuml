@@ -6,6 +6,8 @@ from shutil import copyfile
 import time
 from data import disease
 import cv2
+import numpy as np
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
@@ -21,6 +23,51 @@ ripeness_label = ""
 disease_label = ""
 camera_active = False
 
+heatmap_file_counter = 1
+
+def get_unique_heatmap_filename(base_name, folder, extension=".jpg"):
+    """Generates a unique filename for heatmaps by appending an incremental number."""
+    global heatmap_file_counter
+
+    # Find the next available filename
+    while os.path.exists(os.path.join(folder, f"{base_name}{heatmap_file_counter}{extension}")):
+        heatmap_file_counter += 1
+
+    filename = f"{base_name}{heatmap_file_counter}{extension}"
+    heatmap_file_counter += 1
+    return filename
+
+def generate_heatmap(image, detections, output_path):
+    """
+    Generate a heatmap from YOLO detections and overlay it on the image.
+
+    Args:
+        image: The original image (numpy array).
+        detections: YOLOv5 detections (list of bounding boxes and confidence scores).
+        output_path: File path to save the heatmap.
+    """
+    heatmap = np.zeros(image.shape[:2], dtype=np.float32)
+
+    for detection in detections:
+        x1, y1, x2, y2, conf = map(int, detection[:5])  # Get bounding box and confidence
+        heatmap[y1:y2, x1:x2] += conf  # Add confidence scores to the heatmap region
+
+    # Normalize the heatmap
+    heatmap = (heatmap - heatmap.min()) / (heatmap.max() - heatmap.min() + 1e-6)
+
+    # Resize heatmap to match the image size
+    heatmap_resized = cv2.resize(heatmap, (image.shape[1], image.shape[0]))
+
+    # Convert heatmap to color
+    heatmap_color = cv2.applyColorMap((heatmap_resized * 255).astype(np.uint8), cv2.COLORMAP_JET)
+
+    # Overlay heatmap on the original image
+    overlayed_image = cv2.addWeighted(image, 0.6, heatmap_color, 0.4, 0)
+
+    # Save the heatmap image
+    cv2.imwrite(output_path, overlayed_image)
+
+
 def process_frame(frame):
     global mango_message, ripeness_label, disease_label
 
@@ -30,6 +77,7 @@ def process_frame(frame):
     # Run mango model detection
     mango_results = mango_model(img_rgb)
     mango_detected = False
+    mango_detections = mango_results.pred[0].cpu().numpy()
 
     # Iterate over mango detections
     for detection in mango_results.pred[0]:
@@ -41,10 +89,21 @@ def process_frame(frame):
                 mango_message = "Mango Detected"  # Update global variable
                 # Draw bounding box for mango detection
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Blue box for "Mango"
-                cv2.putText(frame, "Mango Detected", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-                break
+                break  # Exit loop after detecting the first mango
 
     if mango_detected:
+        # Generate heatmap only when a mango is detected
+        heatmap_output_folder = os.path.join(os.getcwd(), 'static', 'heatmaps')
+        if not os.path.exists(heatmap_output_folder):
+            os.makedirs(heatmap_output_folder)
+
+        # Generate a unique filename for the heatmap
+        heatmap_filename = get_unique_heatmap_filename("mango_heatmap", heatmap_output_folder)
+        output_path = os.path.join(heatmap_output_folder, heatmap_filename)
+
+        print(f"Saving heatmap to {output_path}")
+        generate_heatmap(frame, mango_detections, output_path)  # Generate and save heatmap
+
         # Run ripeness model detection
         ripeness_results = ripeness_model(img_rgb)
         for detection in ripeness_results.pred[0]:
@@ -71,10 +130,9 @@ def process_frame(frame):
 
     return frame
 
-
 def generate():
     global camera_active
-    camera = cv2.VideoCapture(2)
+    camera = cv2.VideoCapture(0)
 
     while camera_active:
         success, frame = camera.read()
@@ -115,7 +173,7 @@ def video_feed():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global mango_message, ripeness_label, disease_label
-    cause, treatment, symptoms = "", "", ""
+    cause, symptoms = "", ""
     if request.method == 'POST':
         # Check if the file is in the request
         if 'file' not in request.files:
@@ -133,6 +191,16 @@ def index():
             
             # Run YOLOv5 mango detection inference with the merged dataset model
             mango_results = mango_model(filepath)
+            mango_detections = mango_results.pred[0].cpu().numpy()
+
+            # Generate and save the heatmap
+            heatmap_output_folder = os.path.join(os.getcwd(), 'static', 'heatmaps')
+            if not os.path.exists(heatmap_output_folder):
+                os.makedirs(heatmap_output_folder)
+            heatmap_filename = get_unique_heatmap_filename("mango_heatmap", heatmap_output_folder)
+            output_path = os.path.join(heatmap_output_folder, heatmap_filename)
+            image = cv2.imread(filepath)
+            generate_heatmap(image, mango_detections, output_path)
             
             # Get the names of the detected classes (including mango and non-mango objects)
             detected_classes = mango_results.names  # class labels
@@ -204,15 +272,12 @@ def index():
                     if disease_label == 'Anthracnose' or 'anthracnose':
                         cause = disease['anthracnose']['cause']
                         symptoms = disease['anthracnose']['symptoms']
-                        treatment = disease['anthracnose']['treatment']
                     elif disease_label == 'Lasiodiplodia' or 'lasiodiplodia':
                         cause = disease['ser']['cause']
                         symptoms = disease['ser']['symptoms']
-                        treatment = disease['ser']['treatment']
                     elif disease_label == 'Aspergillus' or 'aspergillus':
                         cause = disease['bmr']['cause']
                         symptoms = disease['bmr']['symptoms']
-                        treatment = disease['bmr']['treatment']
                 else:
                     disease_label = "No disease detected."
 
@@ -222,8 +287,7 @@ def index():
                                         ripeness_label=ripeness_label,
                                         disease_label=disease_label, 
                                         cause=cause, 
-                                        symptoms=symptoms, 
-                                        treatment=treatment,
+                                        symptoms=symptoms,
                                         mango_message=mango_message)
             else:
                 return render_template('index.html', 
@@ -231,7 +295,7 @@ def index():
                                        mango_result_image=destination_path, 
                                        mango_message=mango_message)
 
-    return render_template('index.html', mango_message=mango_message, ripeness_label=ripeness_label, disease_label=disease_label, cause=cause, symptoms=symptoms, treatment=treatment)
+    return render_template('index.html', mango_message=mango_message, ripeness_label=ripeness_label, disease_label=disease_label, cause=cause, symptoms=symptoms)
 
 @app.route('/resources')
 def resources():

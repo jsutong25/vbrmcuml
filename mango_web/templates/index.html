@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mango AI</title>
   <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.ico')}}" type="image/x-icon">
 </head>
 <body class="">
     <nav class="w-full bg-black py-8 fixed z-50">
@@ -70,7 +71,6 @@
                 {% if disease_label %}
                 <h2>Cause/s: <span class="underline font-bold">{{ cause }}</span></h2>
                 <h2>Symptom/s: <span class="underline font-bold">{{ symptoms }}</span></h2>
-                <h2>Treatment: <span class="underline font-bold">{{ treatment }}</span></h2>
                 <br>
                 <a class="underline hover:font-bold" href="{{ url_for('resources') }}">More info...</a>
                 {% endif %}
@@ -82,12 +82,16 @@
         <div id="detection-results" class="hidden flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
             <div class="w-full flex justify-center mt-4 mb-4">
                 <img id="camera-feed" alt="cam" class="rounded-lg hidden">
+                <div class="flex flex-nowrap items-center gap-2 mt-4 ml-4 w-fit">
+                    <div class="w-4 h-4 border border-[#FF0000]"></div><p>Mango</p>
+                    <div class="w-4 h-4 border border-[#00FF00]"></div><p>Ripeness</p>
+                    <div class="w-4 h-4 border border-[#0000FF]"></div><p>Disease</p>
+                </div>
             </div>
         </div>
     </section>
 
     <section>
-
         <div class="flex items-center p-4 text-sm text-red-800 border border-red-300 rounded-lg bg-black dark:text-red-400 dark:border-red-800 mx-14 mb-10 mt-14" role="alert">
             <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
