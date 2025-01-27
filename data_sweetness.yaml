@@ -1,0 +1,13 @@
+train: dataset/sweetness/train/images
+val: dataset/sweetness/val/images
+test: dataset/sweetness/test/images
+
+nc: 3
+names: ['overripe mango', 'ripe mango', 'unripe mango']
+
+roboflow:
+  workspace: group1tjes-zcjlu
+  project: mango-7cab0
+  version: 6
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/group1tjes-zcjlu/mango-7cab0/dataset/6

@@ -64,7 +64,7 @@
             <div class="flex flex-col my-auto text-center md:text-left">
                 <h2>Mango Detection: <span class="underline font-bold">{{ mango_message }}</span></h2>
                 
-                <h2>Ripeness Level: <span class="underline font-bold">{{ ripeness_label }}</span></h2>
+                <h2>Sweetness Level: <span class="underline font-bold">{{ sweetness_label }}</span></h2>
                 
                 <h2>Disease Detection Result: <span class="underline font-bold">{{ disease_label }}</span></h2>
 
@@ -81,10 +81,10 @@
 
         <div id="detection-results" class="hidden flex flex-col md:flex-row justify-center mx-10 py-5 mt-14 gap-2 md:gap-5 border-2 border-yellow-500">
             <div class="w-full flex justify-center mt-4 mb-4">
-                <video id="camera-feed" autoplay muted class="rounded-lg hidden"></video>
+                <img id="camera-feed" alt="cam" class="rounded-lg hidden">
                 <div class="flex flex-nowrap items-center gap-2 mt-4 ml-4 w-fit">
                     <div class="w-4 h-4 border border-[#FF0000]"></div><p>Mango</p>
-                    <div class="w-4 h-4 border border-[#00FF00]"></div><p>Ripeness</p>
+                    <div class="w-4 h-4 border border-[#00FF00]"></div><p>Sweetness</p>
                     <div class="w-4 h-4 border border-[#0000FF]"></div><p>Disease</p>
                 </div>
             </div>
@@ -183,41 +183,82 @@
     </script>
 
     <script>
-        let video = document.getElementById('camera-feed');
+        let stream; // Variable to hold the camera stream
+        let intervalId; // Variable to store the interval ID for frame processing
 
-        // Start the camera feed using getUserMedia
-        function startCamera() {
-            if (navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function (stream) {
-                        video.srcObject = stream;
-                        video.classList.remove('hidden');  // Show the video element
+        // Start/stop camera function
+        function toggleCamera() {
+            const video = document.getElementById('camera-feed');
+            const detectionResultsDiv = document.getElementById('detection-results');
+
+            if (video.classList.contains('hidden')) {
+                // Start the camera feed
+                fetch('/start_camera')
+                    .then(() => {
+                        video.src = '/video_feed'; // Set video feed URL
+                        video.classList.remove('hidden'); // Show the video element
+                        detectionResultsDiv.classList.remove('hidden'); // Show the detection results div
                     })
-                    .catch(function (error) {
-                        console.error("Error accessing camera:", error);
-                    });
+                    .catch(err => console.error("Error starting camera:", err));
             } else {
-                alert("Your browser does not support getUserMedia.");
+                // Stop the camera feed
+                fetch('/stop_camera')
+                    .then(() => {
+                        video.src = ''; // Remove the video feed URL
+                        video.classList.add('hidden'); // Hide the video element
+                        detectionResultsDiv.classList.add('hidden'); // Hide the detection results div
+                    })
+                    .catch(err => console.error("Error stopping camera:", err));
             }
         }
 
-        // Stop the camera feed
+        // Stop the camera and clear interval
         function stopCamera() {
-            if (video.srcObject) {
-                const stream = video.srcObject;
-                const tracks = stream.getTracks();
+            if (stream) {
+                // Stop all tracks to turn off the camera
+                stream.getTracks().forEach(track => track.stop());
+                stream = null; // Clear the stream
+            }
 
-                tracks.forEach(function (track) {
-                    track.stop();
-                });
-
-                video.srcObject = null;  // Stop the video
-                video.classList.add('hidden');  // Hide the video element
+            // Clear the interval to stop frame processing
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null; // Clear the interval ID
             }
         }
 
-        // Call this function when the user clicks a button to start the camera
-        startCamera();
+        // Start capturing frames and sending to backend for detection
+        function startDetection(video) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            // Set up an interval for capturing and processing frames
+            intervalId = setInterval(() => {
+                if (stream) { // Only process if the stream is active
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Convert frame to base64
+                    const imageData = canvas.toDataURL('image/jpeg');
+
+                    // Send frame to server for detection
+                    fetch('/detect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ image: imageData })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display detection results
+                        console.log("Detection:", data);
+                    })
+                    .catch(error => console.error("Detection error:", error));
+                }
+            }, 500); // Capture frame every 500ms
+        }
     </script>
 
 

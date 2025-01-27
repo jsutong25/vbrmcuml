@@ -703,16 +703,16 @@ video {
   margin-inline-end: 0.75rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .mt-14 {
   margin-top: 3.5rem;
 }
 
 .mt-4 {
   margin-top: 1rem;
-}
-
-.ml-4 {
-  margin-left: 1rem;
 }
 
 .block {
@@ -771,14 +771,6 @@ video {
   height: 100%;
 }
 
-.h-1 {
-  height: 0.25rem;
-}
-
-.h-2 {
-  height: 0.5rem;
-}
-
 .w-28 {
   width: 7rem;
 }
@@ -795,21 +787,13 @@ video {
   width: 12rem;
 }
 
-.w-full {
-  width: 100%;
-}
-
-.w-1 {
-  width: 0.25rem;
-}
-
-.w-2 {
-  width: 0.5rem;
-}
-
 .w-fit {
   width: -moz-fit-content;
   width: fit-content;
+}
+
+.w-full {
+  width: 100%;
 }
 
 .max-w-screen-xl {
@@ -954,6 +938,21 @@ video {
   border-top-width: 4px;
 }
 
+.border-\[\#0000FF\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 255 / var(--tw-border-opacity));
+}
+
+.border-\[\#00FF00\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 255 0 / var(--tw-border-opacity));
+}
+
+.border-\[\#FF0000\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 0 0 / var(--tw-border-opacity));
+}
+
 .border-black {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity));
@@ -994,21 +993,6 @@ video {
   border-color: rgb(202 138 4 / var(--tw-border-opacity));
 }
 
-.border-\[\#0000FF\] {
-  --tw-border-opacity: 1;
-  border-color: rgb(0 0 255 / var(--tw-border-opacity));
-}
-
-.border-\[\#00FF00\] {
-  --tw-border-opacity: 1;
-  border-color: rgb(0 255 0 / var(--tw-border-opacity));
-}
-
-.border-\[\#FF0000\] {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 0 0 / var(--tw-border-opacity));
-}
-
 .bg-black {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
@@ -1037,21 +1021,6 @@ video {
 .bg-yellow-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(234 179 8 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#0000FF\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 255 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#00FF00\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 255 0 / var(--tw-bg-opacity));
-}
-
-.bg-\[\#FF0000\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 0 0 / var(--tw-bg-opacity));
 }
 
 .bg-\[url\(\'\/static\/assets\/bgmango\.jpg\'\)\] {
