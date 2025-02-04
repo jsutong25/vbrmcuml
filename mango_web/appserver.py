@@ -8,23 +8,37 @@ from data import disease
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import pathlib
+from pathlib import PosixPath
 import random  
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-temp = pathlib.WindowsPath
+model_paths = {
+    'mango_model': '/var/www/mango_web/yolov5/runs/train/exp24/weights/best.pt',
+    'ripeness_model': '/var/www/mango_web/yolov5/runs/train/exp35/weights/best.pt',
+    'disease_model': '/var/www/mango_web/yolov5/runs/train/exp18/weights/best.pt',
+    'sweetness_model': '/var/www/mango_web/yolov5/runs/train/exp4/weights/best.pt',
+}
 
-# Load the YOLOv5 models
+torch.hub._get_torch_home = lambda: PosixPath('/var/www/mango_web/yolov5')
+
+# Check if model paths exist
+for model_name, path in model_paths.items():
+    if not os.path.exists(path):
+        print(f'Error: {model_name} path does not exist: {path}')
+    else:
+        print(f'{model_name} path exists: {path}')
+
 try:
-    mango_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp24/weights/best.pt', source='local', force_reload=True, device='cpu')
-    ripeness_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp35/weights/best.pt', source='local', force_reload=True, device='cpu')
-    disease_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp18/weights/best.pt', source='local', force_reload=True, device='cpu')  # Load disease model
-    sweetness_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path='/var/www/mango_web/yolov5/runs/train/exp4/weights/best.pt', source='local', force_reload=True, device='cpu')  # Load disease model
-finally:
-    pathlib.WindowsPath = temp
+    mango_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path=model_paths['mango_model'], source='local', force_reload=True)
+    ripeness_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path=model_paths['ripeness_model'], source='local', force_reload=True)
+    disease_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path=model_paths['disease_model'], source='local', force_reload=True)
+    sweetness_model = torch.hub.load('/var/www/mango_web/yolov5', 'custom', path=model_paths['sweetness_model'], source='local', force_reload=True)
+    print('Mango models loaded successfully')
+except Exception as e:
+    print(f'Error loading models: {e}')
 
 mango_message = ""
 ripeness_label = ""
@@ -174,10 +188,12 @@ def index():
             file.save(filepath)
 
             uploaded_image = os.path.join('uploads', filename)
+
+            if 'mango_model' not in globals():
+                return "Mango model not loaded", 500
             
             # Run YOLOv5 mango detection inference with the merged dataset model
             mango_results = mango_model(filepath)
-            mango_detections = mango_results.pred[0].cpu().numpy()
             
             # Get the names of the detected classes (including mango and non-mango objects)
             detected_classes = mango_results.names  # class labels
